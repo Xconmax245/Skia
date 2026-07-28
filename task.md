@@ -36,8 +36,8 @@
 - [x] Hedge desk view (Next.js `/hedge`)
 - [x] Public settlement feed (Next.js `/settlement`)
 - [x] Wire client-side encryptInput simulation
-- [ ] Deploy full stack to Sepolia
-- [ ] simulate-bidders.ts + simulate-hedgers.ts
+- [x] Deploy full stack to Sepolia
+- [x] simulate-bidders.ts + simulate-hedgers.ts
 - [ ] Record demo video
 - [ ] Write README.md + feedback.md
 - [ ] Final deploy + X post
