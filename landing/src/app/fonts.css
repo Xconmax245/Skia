@@ -1,0 +1,77 @@
+/* Synonym */
+@font-face {
+  font-family: 'Synonym';
+  src: url('//cdn.fontshare.com/wf/DFYGA7EPVEG7D7UPFPAIYFH2F4NM27PX/EVVPJ6WZV4QLGKO7KZL6GMJI3CXH433B/EMRNL4XMLBJQUVRD4I5XB7IIBFI5JC3Z.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/DFYGA7EPVEG7D7UPFPAIYFH2F4NM27PX/EVVPJ6WZV4QLGKO7KZL6GMJI3CXH433B/EMRNL4XMLBJQUVRD4I5XB7IIBFI5JC3Z.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/DFYGA7EPVEG7D7UPFPAIYFH2F4NM27PX/EVVPJ6WZV4QLGKO7KZL6GMJI3CXH433B/EMRNL4XMLBJQUVRD4I5XB7IIBFI5JC3Z.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Synonym';
+  src: url('//cdn.fontshare.com/wf/FGFTDNARUVIBDKBH6IHNBOQNDT4HPTOW/DQI5KYN7O74HFIZJLVB36XBKUIAOAGYJ/DXASCID3BXP555YRRIR7LNOVRX77YPHC.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/FGFTDNARUVIBDKBH6IHNBOQNDT4HPTOW/DQI5KYN7O74HFIZJLVB36XBKUIAOAGYJ/DXASCID3BXP555YRRIR7LNOVRX77YPHC.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/FGFTDNARUVIBDKBH6IHNBOQNDT4HPTOW/DQI5KYN7O74HFIZJLVB36XBKUIAOAGYJ/DXASCID3BXP555YRRIR7LNOVRX77YPHC.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Synonym';
+  src: url('//cdn.fontshare.com/wf/OLXBPT3HV3XOCH3GZ75POZQQZCOITSOK/PRXXQBEUWYC7F2NHKCW2Y26DH5XJSZWW/R55OPPYH4ZWP55QB6AHSS5YT3TLGUGNE.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/OLXBPT3HV3XOCH3GZ75POZQQZCOITSOK/PRXXQBEUWYC7F2NHKCW2Y26DH5XJSZWW/R55OPPYH4ZWP55QB6AHSS5YT3TLGUGNE.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/OLXBPT3HV3XOCH3GZ75POZQQZCOITSOK/PRXXQBEUWYC7F2NHKCW2Y26DH5XJSZWW/R55OPPYH4ZWP55QB6AHSS5YT3TLGUGNE.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Synonym';
+  src: url('//cdn.fontshare.com/wf/M4NZQ2JCB6MXNBRDCL62PCUDE7GQYMSM/35C25Y5LCQENYUX4Z56WXZUM5HXPAB2L/LICKIETVGV4KBVZA3MNOBQA4VS4YJI7F.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/M4NZQ2JCB6MXNBRDCL62PCUDE7GQYMSM/35C25Y5LCQENYUX4Z56WXZUM5HXPAB2L/LICKIETVGV4KBVZA3MNOBQA4VS4YJI7F.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/M4NZQ2JCB6MXNBRDCL62PCUDE7GQYMSM/35C25Y5LCQENYUX4Z56WXZUM5HXPAB2L/LICKIETVGV4KBVZA3MNOBQA4VS4YJI7F.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+}
+
+/* Chillax */
+@font-face {
+  font-family: 'Chillax';
+  src: url('//cdn.fontshare.com/wf/WSPWZKQM26GGKSLVGSP2CFUHUMS5BCYQ/UE3YJANJM3SE3IWT4TOMYQVMLCQ6GZGG/XESIRBQU62YFBC7YQZI6D2NT5CNZ4PPU.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/WSPWZKQM26GGKSLVGSP2CFUHUMS5BCYQ/UE3YJANJM3SE3IWT4TOMYQVMLCQ6GZGG/XESIRBQU62YFBC7YQZI6D2NT5CNZ4PPU.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/WSPWZKQM26GGKSLVGSP2CFUHUMS5BCYQ/UE3YJANJM3SE3IWT4TOMYQVMLCQ6GZGG/XESIRBQU62YFBC7YQZI6D2NT5CNZ4PPU.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Chillax';
+  src: url('//cdn.fontshare.com/wf/XASL35KKT35X3ACCBCOQKKABSR6AT3FX/6MU5BWUUPHCFUHM2F3E3QPQGKXCVBUOO/WZY5PMNTII6NKOB2TTIAX7QVAWMSY2DQ.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/XASL35KKT35X3ACCBCOQKKABSR6AT3FX/6MU5BWUUPHCFUHM2F3E3QPQGKXCVBUOO/WZY5PMNTII6NKOB2TTIAX7QVAWMSY2DQ.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/XASL35KKT35X3ACCBCOQKKABSR6AT3FX/6MU5BWUUPHCFUHM2F3E3QPQGKXCVBUOO/WZY5PMNTII6NKOB2TTIAX7QVAWMSY2DQ.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Chillax';
+  src: url('//cdn.fontshare.com/wf/2T24MWUOKZU65SZJ33GPRGNOKE4KPOBX/T6LIXZJIPB23UDPMTIKURYWSZLXZBJ3A/THF5L6EHVL4N4NNE3GYDZNZSHABL5CH5.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/2T24MWUOKZU65SZJ33GPRGNOKE4KPOBX/T6LIXZJIPB23UDPMTIKURYWSZLXZBJ3A/THF5L6EHVL4N4NNE3GYDZNZSHABL5CH5.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/2T24MWUOKZU65SZJ33GPRGNOKE4KPOBX/T6LIXZJIPB23UDPMTIKURYWSZLXZBJ3A/THF5L6EHVL4N4NNE3GYDZNZSHABL5CH5.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Chillax';
+  src: url('//cdn.fontshare.com/wf/UM553GIXLG5E46TUH763VYPGAQ77BPQ5/NN4EI53RUGC4BO5HP5F46SYQ4WY4U4CE/T2KA2X72VGASVXFVB7QCOIFYVH5GZJTW.woff2') format('woff2'),
+       url('//cdn.fontshare.com/wf/UM553GIXLG5E46TUH763VYPGAQ77BPQ5/NN4EI53RUGC4BO5HP5F46SYQ4WY4U4CE/T2KA2X72VGASVXFVB7QCOIFYVH5GZJTW.woff') format('woff'),
+       url('//cdn.fontshare.com/wf/UM553GIXLG5E46TUH763VYPGAQ77BPQ5/NN4EI53RUGC4BO5HP5F46SYQ4WY4U4CE/T2KA2X72VGASVXFVB7QCOIFYVH5GZJTW.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+}
+
+
