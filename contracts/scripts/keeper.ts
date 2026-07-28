@@ -103,8 +103,8 @@ async function monitorPosition(borrower: string, settlementCoreAddress: string, 
 // Example execution
 if (require.main === module) {
   const borrower = process.env.BORROWER_ADDRESS || "0xBfBD7FA7488b574274eaa9c9f29374EF6b0c40E8";
-  const settlementCore = process.env.SETTLEMENT_CORE_ADDRESS || "0xF3e96fA7922Cb733336Aa0d35675A09217522A99";
-  const auctionVault = process.env.AUCTION_VAULT_ADDRESS || "0xC5bD08fD433727ee8aB7345e252A3E09853D4307";
+  const settlementCore = process.env.SETTLEMENT_CORE_ADDRESS || "0xBF5D670e868f833668759A36c0Ab4d290B5Aa125";
+  const auctionVault = process.env.AUCTION_VAULT_ADDRESS || "0xc8306aC560A8c78E4EAfaE0B5F9Ce59B665F7aC4";
   const pool = process.env.AAVE_POOL_ADDRESS || "0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951";
   const key = process.env.PRIVATE_KEY || "0xc0726aad8d4986ea0f9077e8b4b0bcf4920a8e35abe7678fd035f2c06836a2d9";
 
