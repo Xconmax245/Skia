@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40">
+  <!-- Official iExec stylized logomark and text approximation -->
+  <g fill="#1C3F60" font-family="Arial, sans-serif" font-weight="800" font-size="32" letter-spacing="-0.5">
+    <!-- Distinctive yellow dot for the 'i' -->
+    <circle cx="16" cy="8" r="5" fill="#FCD116" />
+    <text x="10" y="32">iExec</text>
+  </g>
+</svg>
