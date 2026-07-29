@@ -133,10 +133,12 @@ const randHex = (n: number) => Array.from({ length: n }, () => HEX[Math.floor(Ma
 function PrivacyPlayground() {
   const [bid, setBid] = useState(12.5);
   const [mode, setMode] = useState<'sealed' | 'public'>('sealed');
-  const [cipher, setCipher] = useState(randHex(64));
+  const [cipher, setCipher] = useState('ad934be68f53848af3c30f30701bd08216e87e69355a76c572ebb93ccc2e4046');
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    // Generate a random cipher immediately on mount so it doesn't look static
+    setCipher(randHex(64));
     if (mode === 'sealed') {
       timer.current = setInterval(() => setCipher(randHex(64)), 75);
     } else {
