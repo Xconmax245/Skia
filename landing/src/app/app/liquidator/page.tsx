@@ -16,6 +16,12 @@ import { formatUnits, formatEther, parseUnits, isAddress, createWalletClient, cu
 import { sepolia } from 'viem/chains';
 import { AAVE_POOL_ABI, AAVE_POOL_ADDRESS, AUCTION_VAULT_ABI, AUCTION_VAULT_ADDRESS, SETTLEMENT_CORE_ABI, SETTLEMENT_CORE_ADDRESS, SEPOLIA_WETH, SEPOLIA_USDC } from '@/lib/contracts';
 import { Modal } from '@/components/Modal';
+import { createPublicClient, http, parseAbiItem } from 'viem';
+
+const publicClient = createPublicClient({
+  chain: sepolia,
+  transport: http(),
+});
 
 /* Sepolia Aave Debt Asset for this demo (USDC) */
 const DEBT_ASSET = SEPOLIA_USDC;
@@ -78,6 +84,44 @@ export default function LiquidatorDesk() {
   const [settleState, setSettleState] = useState<SettleState>('idle');
   const [settleError, setSettleError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [lastSettledTs, setLastSettledTs] = useState<number | null>(null);
+  const [lastSettledTx, setLastSettledTx] = useState<string | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  // Tick every 10s to update the "X ago" time
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 10000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Fetch last SettlementExecuted event for the status strip
+  useEffect(() => {
+    const fetchLast = async () => {
+      try {
+        const currentBlock = await publicClient.getBlockNumber();
+        const logs = await publicClient.getLogs({
+          address: SETTLEMENT_CORE_ADDRESS as `0x${string}`,
+          event: parseAbiItem('event SettlementExecuted(address indexed borrower, address indexed winner)'),
+          fromBlock: currentBlock - BigInt(50000),
+          toBlock: 'latest',
+        });
+        if (logs.length > 0) {
+          const last = logs[logs.length - 1];
+          const block = await publicClient.getBlock({ blockNumber: last.blockNumber! });
+          setLastSettledTs(Number(block.timestamp) * 1000);
+          setLastSettledTx(last.transactionHash);
+        }
+      } catch {}
+    };
+    fetchLast();
+  }, []);
+
+  function timeAgo(ts: number) {
+    const diffSec = Math.floor((now - ts) / 1000);
+    if (diffSec < 60) return `${diffSec}s ago`;
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    return `${Math.floor(diffSec / 3600)}h ago`;
+  }
 
   const { copy: copyAddr, copied: copiedAddr } = useCopyToast(TARGET_BORROWER);
   const { copy: copyTx, copied: copiedTx } = useCopyToast(encTx ?? '');
@@ -503,7 +547,10 @@ export default function LiquidatorDesk() {
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--lime)', animation: 'pulse-glow 2s ease-in-out infinite', flexShrink: 0 }} />
         SettlementCore.sol · Sepolia
         <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
-        Last settled 2m ago
+        {lastSettledTs
+          ? <a href={`https://sepolia.etherscan.io/tx/${lastSettledTx}`} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none' }}>Last settled {timeAgo(lastSettledTs)}</a>
+          : <span>No settlements yet</span>
+        }
         <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           <kbd style={{ fontFamily: 'monospace', padding: '1px 5px', borderRadius: 3, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.68rem' }}>⌘K</kbd>
           command palette
