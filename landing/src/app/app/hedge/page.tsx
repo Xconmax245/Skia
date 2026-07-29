@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, ArrowDownLeft, ArrowUpRight, CheckCircle2, XCircle, Loader2, ExternalLink } from 'lucide-react';
+import { Lock, ArrowDownLeft, ArrowUpRight, CheckCircle2, XCircle, Loader2, ExternalLink, Zap } from 'lucide-react';
 import { CopyToast } from '@/components/CopyToast';
 import { useHoverShuffle, useCopyToast } from '@/lib/useShuffleText';
 import { fadeUp, stagger, springPop } from '@/lib/motion';

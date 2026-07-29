@@ -438,7 +438,7 @@ section {
 .hero-headline {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(4rem, 9.5vw, 9rem);
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
   text-transform: uppercase;
   letter-spacing: -0.025em;
   line-height: 0.95;

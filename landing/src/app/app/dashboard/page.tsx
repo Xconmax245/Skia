@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Lock, Activity, X, ChevronDown, Search, Globe, Eye, ArrowDown, ArrowUp, ArrowRight, BookOpen, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Shield, Lock, Activity, X, ChevronDown, Search, Globe, Eye, ArrowDown, ArrowUp, ArrowRight, BookOpen, AlertTriangle, ExternalLink, Zap } from 'lucide-react';
 import { useWallet } from '@/lib/walletContext';
 import { RequireWallet } from '@/components/RequireWallet';
 import { useShuffleText } from '@/lib/useShuffleText';

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Copy, Check, ExternalLink, ChevronUp, ChevronDown, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Lock, Copy, Check, ExternalLink, ChevronUp, ChevronDown, CheckCircle2, XCircle, Loader2, Zap, Eye } from 'lucide-react';
 import { CountdownRing } from '@/components/CountdownRing';
 import { Sparkline } from '@/components/Sparkline';
 import { CipherSkeleton } from '@/components/CipherSkeleton';
