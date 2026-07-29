@@ -15,7 +15,7 @@ contract AuctionVault {
         bool submitted;
     }
 
-    uint256 public constant MAX_BIDDERS = 5;
+    uint256 public constant MAX_BIDDERS = 20;
     SealedBid[MAX_BIDDERS] public bids;
     uint256 public bidCount;
     address public owner;
