@@ -6,6 +6,11 @@ import { EyebrowWordPills } from './EyebrowPills';
 import { ArrowDown } from 'lucide-react';
 import { useSmoothCipherReveal } from '@/lib/useShuffleText';
 import { fadeUp, stagger, scaleIn, ease } from '@/lib/motion';
+import { createPublicClient, http } from 'viem';
+import { sepolia } from 'viem/chains';
+import { AUCTION_VAULT_ABI, AUCTION_VAULT_ADDRESS } from '@/lib/contracts';
+
+const publicClient = createPublicClient({ chain: sepolia, transport: http() });
 
 /* ── Ciphertext scramble line ── */
 function ScrambledLine({
@@ -88,6 +93,23 @@ function DriftingHex() {
 }
 
 export function Hero() {
+  const [bidCount, setBidCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const count = await publicClient.readContract({
+          address: AUCTION_VAULT_ADDRESS as `0x${string}`,
+          abi: AUCTION_VAULT_ABI,
+          functionName: 'bidCount',
+        });
+        setBidCount(Number(count));
+      } catch {}
+    };
+    fetch();
+    const t = setInterval(fetch, 30000);
+    return () => clearInterval(t);
+  }, []);
   return (
     <section className="hero bg-ink" id="home">
       {/* ── Background Atmosphere ── */}
@@ -159,7 +181,7 @@ export function Hero() {
             {/* Live Signal */}
             <motion.div variants={fadeUp} style={{ marginTop: 24, fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }} className="hero-cta-row">
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--lime)', animation: 'pulse-glow 2s ease-in-out infinite' }} />
-              Live on Sepolia · Auction #0042 resolving in 34s
+              Live on Sepolia · {bidCount !== null ? `${bidCount} sealed bid${bidCount !== 1 ? 's' : ''} on-chain` : 'Loading auction state...'}
             </motion.div>
           </motion.div>
 
