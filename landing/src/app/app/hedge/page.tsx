@@ -206,7 +206,7 @@ export default function HedgeDesk() {
           address: COLLATERAL_TOKEN_ADDRESS as `0x${string}`,
           abi: COLLATERAL_TOKEN_ABI,
           functionName: 'setOperator',
-          args: [CREDIT_VAULT_ADDRESS as `0x${string}`, expiry],
+          args: [CREDIT_VAULT_ADDRESS as `0x${string}`, Number(expiry)],
         });
         setIntentState('operator-granted');
       }
