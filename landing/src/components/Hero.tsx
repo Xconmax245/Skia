@@ -157,8 +157,8 @@ export function Hero() {
 
             {/* Scrambling Headline */}
             <h1 className="hero-headline" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <ScrambledLine text="SEALED BIDS." delayMs={250} durationMs={1100} color="#fff" />
-              <ScrambledLine text="HIDDEN HEDGES." delayMs={600} durationMs={1200} color="var(--lime)" />
+              <ScrambledLine text="PUBLIC AUCTIONS GET FRONT-RUN." delayMs={250} durationMs={1100} color="#fff" />
+              <ScrambledLine text="PUBLIC HEDGES TRIGGER PANICS." delayMs={600} durationMs={1200} color="var(--peach)" />
             </h1>
 
             {/* Sub-copy */}
@@ -167,7 +167,7 @@ export function Hero() {
               className="body-lg text-muted hero-sub"
               style={{ maxWidth: 560, marginTop: 28, marginBottom: 36, lineHeight: 1.6 }}
             >
-              Confidential sealed-bid liquidation auctions and private credit-default hedging for Aave V3 — powered by iExec Nox TEEs. No mock data. One shared settlement core.
+              Skia fixes both with one TEE-attested settlement core for Aave V3 — combining sealed-bid Vickrey liquidations with confidential CDS matching. No MEV, no reflexivity.
             </motion.p>
 
             {/* CTAs */}

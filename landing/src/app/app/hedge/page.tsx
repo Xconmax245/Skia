@@ -262,9 +262,15 @@ export default function HedgeDesk() {
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.5 }}
           className="app-card" style={{ padding: 28 }}>
 
-          <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Lock size={15} color={accent} /> Submit Encrypted Intent
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <h3 style={{ fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Lock size={15} color={accent} /> Submit Encrypted Intent
+            </h3>
+            
+            <button onClick={() => setAmount('25000')} style={{ padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Zap size={10} color={accent} /> Demo Mode
+            </button>
+          </div>
 
           {/* Buy / Sell segmented toggle */}
           <div className="pill-toggle" style={{ marginBottom: 24, width: '100%' }}>

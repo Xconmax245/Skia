@@ -176,7 +176,12 @@ function PublicActivity({ label, icon: Icon, time, value, txHash }: { label: str
           <Icon size={14} />
         </div>
         <div>
-          <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{label}</div>
+          <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {label}
+            <span style={{ fontSize: '0.65rem', background: 'rgba(130,200,255,0.15)', color: 'rgba(130,200,255,0.9)', padding: '2px 6px', borderRadius: 4, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Auction Winner + CDS Payout
+            </span>
+          </div>
           <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{time}</div>
         </div>
       </div>
@@ -359,13 +364,25 @@ export default function Dashboard() {
 
         {/* 19.3 Hero metric + chart */}
         <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-            Health Factor
-            <button onClick={() => setPrivacyMode(m => m === 'private' ? 'public' : 'private')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: privacyMode === 'private' ? 'var(--lime)' : 'rgba(255,255,255,0.4)', padding: 2, display: 'flex' }}
-              title={privacyMode === 'private' ? 'Show public view' : 'Switch to private'}
-            >
-              {privacyMode === 'private' ? <Lock size={12} /> : <Eye size={12} />}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 6 }}>
+              Health Factor
+              <button onClick={() => setPrivacyMode(m => m === 'private' ? 'public' : 'private')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: privacyMode === 'private' ? 'var(--lime)' : 'rgba(255,255,255,0.4)', padding: 2, display: 'flex' }}
+                title={privacyMode === 'private' ? 'Show public view' : 'Switch to private'}
+              >
+                {privacyMode === 'private' ? <Lock size={12} /> : <Eye size={12} />}
+              </button>
+            </div>
+            
+            {/* Demo trigger */}
+            <button onClick={() => {
+              // We'll just fake an update to HF for demo
+              const el = document.getElementById('hf-display');
+              if (el) el.innerText = '0.98';
+              setShowBanner(true);
+            }} style={{ padding: '4px 10px', borderRadius: 999, background: 'rgba(242,201,160,0.1)', border: '1px solid rgba(242,201,160,0.2)', color: 'var(--peach)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Zap size={10} /> Trigger Demo Default
             </button>
           </div>
 
@@ -383,7 +400,7 @@ export default function Dashboard() {
               </>
             ) : (
               <>
-                <div style={{ fontSize: '4rem', fontFamily: 'var(--font-display)', fontWeight: 900, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                <div id="hf-display" style={{ fontSize: '4rem', fontFamily: 'var(--font-display)', fontWeight: 900, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                   {hfCurrent.toFixed(2)}
                 </div>
                 {(() => {

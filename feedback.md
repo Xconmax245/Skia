@@ -103,6 +103,11 @@ For our Vickrey auction this is fine — we batch all comparisons into one TEE c
 
 The `nox-hardhat-plugin` required a `.cjs` config file rather than `.ts`. This broke TypeScript users' normal workflow (we use TS everywhere else). We ended up maintaining two config files: `hardhat.config.ts` (for IDE type checking) and `hardhat.config.cjs` (for actual compilation). A TS-native plugin config would streamline this significantly.
 
+### 6. Attestation Verification DX
+
+While the TEE generates a cryptographic attestation, verifying this attestation on-chain within `SettlementCore` requires deep understanding of the Nox enclave's output format and signature verification. Currently, this feels a bit like "black magic" to the average Solidity dev.
+**Suggestion:** A standard `NoxVerifier.sol` library that abstracts away the signature checking and simply returns `(bool isValid, bytes memory verifiedOutput)` would dramatically lower the barrier to entry for cross-contract TEE verification.
+
 ---
 
 ## Performance Observations

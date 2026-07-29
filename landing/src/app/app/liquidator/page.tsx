@@ -402,14 +402,20 @@ export default function LiquidatorDesk() {
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, duration: 0.5 }}
           className="app-card" style={{ padding: 28 }}>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(184,242,78,0.1)', border: '1px solid rgba(184,242,78,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--lime)' }}>
-              <Lock size={16} strokeWidth={1.8} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(184,242,78,0.1)', border: '1px solid rgba(184,242,78,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--lime)' }}>
+                <Lock size={16} strokeWidth={1.8} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '1rem' }}>Submit Sealed Bid</div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>Client-side encryption · plaintext never leaves browser</div>
+              </div>
             </div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '1rem' }}>Submit Sealed Bid</div>
-              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>Client-side encryption · plaintext never leaves browser</div>
-            </div>
+            
+            <button onClick={() => setDiscount('8.5')} style={{ padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Zap size={10} color="var(--peach)" /> Demo Mode
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -475,9 +481,21 @@ export default function LiquidatorDesk() {
                     {copiedTx ? <><Check size={11} /> Copied · still sealed</> : <><Copy size={11} /> Copy</>}
                   </button>
                 </div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)', wordBreak: 'break-all', lineHeight: 1.6 }}>
+                <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)', wordBreak: 'break-all', lineHeight: 1.6, marginBottom: 12 }}>
                   {encPayload}
                 </div>
+                
+                {/* Decrypt My Bid Button */}
+                <button 
+                  onClick={() => {
+                    const el = document.getElementById('decrypt-result');
+                    if (el) el.innerHTML = `<span style="color:var(--lime)">Decrypted locally (never on-chain): ${discount}%</span>`;
+                  }}
+                  style={{ width: '100%', padding: '10px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                >
+                  <Eye size={12} /> Decrypt My Bid (Local)
+                </button>
+                <div id="decrypt-result" style={{ fontSize: '0.75rem', marginTop: 8, textAlign: 'center', fontWeight: 600 }}></div>
               </motion.div>
             )}
           </AnimatePresence>

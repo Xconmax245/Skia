@@ -4,41 +4,49 @@
 
 Skia is a two-sided protocol that brings confidentiality to DeFi liquidations and credit default swaps using iExec Nox Trusted Execution Environments. Liquidators compete in sealed-bid Vickrey auctions. CDS counterparties post encrypted protection intents. A single settlement function clears both markets atomically via Aave V3's `liquidationCall()`.
 
+**Deployed on Sepolia (Chain ID: 11155111):**
+- `AuctionVault`: [`0xc8306aC560A8c78E4EAfaE0B5F9Ce59B665F7aC4`](https://sepolia.etherscan.io/address/0xc8306aC560A8c78E4EAfaE0B5F9Ce59B665F7aC4)
+- `CreditVault`: [`0xFdEfbB3C5Cf4Eb96a2D92Bc4F8e01ccD75bdf784`](https://sepolia.etherscan.io/address/0xFdEfbB3C5Cf4Eb96a2D92Bc4F8e01ccD75bdf784)
+- `SettlementCore`: [`0xBF5D670e868f833668759A36c0Ab4d290B5Aa125`](https://sepolia.etherscan.io/address/0xBF5D670e868f833668759A36c0Ab4d290B5Aa125)
+- `CollateralToken` (cSKIA): [`0xf020F931B7488E8f4c43e14E677D62979f2Af2f7`](https://sepolia.etherscan.io/address/0xf020F931B7488E8f4c43e14E677D62979f2Af2f7)
+
 ---
 
-## 📐 Architecture
+## ⚡ Why This Couldn't Be Built Without Nox
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Browser (Next.js)                                              │
-│  ┌──────────────┐   encryptInput()   ┌──────────────────────┐  │
-│  │ Liquidator   │ ──────────────────▶│  Nox Handle Gateway  │  │
-│  │ Desk         │◀────────────────── │  (bytes32 handle +   │  │
-│  └──────────────┘   handle + proof   │   ZK proof)          │  │
-│                                      └──────────────────────┘  │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │ submitBid(handle, proof)
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Sepolia EVM                                                    │
-│                                                                 │
-│  ┌────────────────┐   resolveVickrey()  ┌─────────────────┐    │
-│  │ AuctionVault   │ ◀───────────────── │   Nox TEE        │    │
-│  │ (euint256 bids)│ ──────────────────▶│  (SGX Enclave)   │    │
-│  └────────────────┘   winner + proof   └─────────────────┘    │
-│                                                ▲               │
-│  ┌────────────────┐   settleOnDefault()        │               │
-│  │ CreditVault    │ ──────────────────────────┘               │
-│  │ (euint256 CDS) │                                            │
-│  └────────────────┘                                            │
-│                                                                 │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │ SettlementCore                                         │    │
-│  │  settle(collateral, debt, borrower, winner, discount)  │    │
-│  │   └─▶ Aave V3 liquidationCall()                        │    │
-│  │   └─▶ CreditVault.settleOnDefault()                    │    │
-│  └────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────┘
+Building this on a public ledger without a TEE fundamentally fails due to two insurmountable MEV issues:
+
+1. **Vickrey Collapse:** In a public sealed-bid auction, bids are visible in the mempool. MEV searchers can perfectly undercut any submitted bid by exactly 1 wei (or 1 basis point) in the same block. A second-price auction collapses into a gas war where the borrower loses all value to searchers. **Skia fixes this** because bids are encrypted client-side; they are never visible in the mempool or on-chain, rendering front-running impossible.
+2. **CDS Reflexivity Risk:** In a public CDS market, exposing massive protection intent sizes signals market weakness or impending default to the rest of the chain, causing reflexivity (e.g., flash crashes). **Skia fixes this** by keeping notional sizes as encrypted `euint256` values. The market never knows how much coverage is being bought until settlement occurs.
+
+---
+
+## 📐 Unified Settlement Architecture
+
+One TEE call resolves *both* the Vickrey liquidation auction and the CDS matching. **The on-chain footprint is identical whether the CDS market exists or not.**
+
+```mermaid
+sequenceDiagram
+    participant B as Browser (Next.js)
+    participant C as EVM (Sepolia)
+    participant T as Nox TEE
+    participant A as Aave V3
+
+    note over B,C: 1. Participants submit encrypted data
+    B->>C: submitBid(euint256)
+    B->>C: submitIntent(euint256)
+    
+    note over C,T: 2. Single unified TEE resolution
+    C->>T: resolveVickrey() & settleOnDefault()
+    note right of T: TEE decrypts all bids & intents
+    note right of T: TEE selects Vickrey winner
+    note right of T: TEE matches CDS buyers & sellers
+    T-->>C: Write encrypted winner & payout amounts + Attestation
+    
+    note over C,A: 3. Atomic execution
+    C->>A: liquidationCall(winner)
+    C->>C: Transfer CDS payouts (confidential)
+    note over C: Emits public SettlementExecuted event
 ```
 
 ---

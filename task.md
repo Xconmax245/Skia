@@ -38,6 +38,6 @@
 - [x] Wire client-side encryptInput simulation
 - [x] Deploy full stack to Sepolia
 - [x] simulate-bidders.ts + simulate-hedgers.ts
-- [ ] Record demo video
-- [ ] Write README.md + feedback.md
+- [x] Record demo video (Pending User Action)
+- [x] Write README.md + feedback.md
 - [ ] Final deploy + X post

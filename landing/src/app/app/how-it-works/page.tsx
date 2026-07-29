@@ -367,26 +367,46 @@ export default function HowItWorks() {
 
         {/* Data flow diagram */}
         <motion.div variants={fadeUp} style={{ padding: '20px 24px', borderRadius: 14, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16, fontWeight: 700 }}>Data Flow</div>
+          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16, fontWeight: 700 }}>Unified Settlement Data Flow</div>
+          
+          {/* Explicit note about shared settlement */}
+          <div style={{ marginBottom: 20, padding: '10px 14px', borderRadius: 8, background: 'rgba(130,200,255,0.08)', border: '1px solid rgba(130,200,255,0.2)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)' }}>
+            <strong style={{ color: 'rgba(130,200,255,0.9)' }}>Crucial Detail:</strong> One TEE call does both Vickrey resolution and CDS payout matching. The on-chain footprint is identical whether the CDS market has open intents or is completely empty.
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap', rowGap: 12 }}>
-            {[
-              { label: 'Browser', sub: 'encryptInput()', color: 'var(--lime)' },
-              { arrow: true },
-              { label: 'Sepolia EVM', sub: 'euint256 calldata', color: 'rgba(255,255,255,0.6)' },
-              { arrow: true },
-              { label: 'Nox TEE', sub: 'Decrypt + Compare', color: 'var(--peach)' },
-              { arrow: true },
-              { label: 'SettlementCore', sub: 'settle() → Aave', color: 'rgba(130,200,255,0.8)' },
-            ].map((item, i) =>
-              'arrow' in item ? (
-                <ArrowRight key={i} size={16} color="rgba(255,255,255,0.2)" style={{ margin: '0 8px' }} />
-              ) : (
-                <div key={i} style={{ padding: '8px 14px', borderRadius: 10, background: `${item.color}12`, border: `1px solid ${item.color}25`, textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: item.color }}>{item.label}</div>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', marginTop: 2, fontFamily: 'monospace' }}>{item.sub}</div>
-                </div>
-              )
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ padding: '8px 14px', borderRadius: 10, background: `var(--lime)12`, border: `1px solid var(--lime)25`, textAlign: 'center' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--lime)' }}>Liquidators</div>
+                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', marginTop: 2, fontFamily: 'monospace' }}>submitBid(encBid)</div>
+              </div>
+              <div style={{ padding: '8px 14px', borderRadius: 10, background: `var(--peach)12`, border: `1px solid var(--peach)25`, textAlign: 'center' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--peach)' }}>CDS Market</div>
+                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', marginTop: 2, fontFamily: 'monospace' }}>submitIntent(encAmt)</div>
+              </div>
+            </div>
+            
+            <ArrowRight size={16} color="rgba(255,255,255,0.2)" style={{ margin: '0 8px' }} />
+            
+            <div style={{ padding: '12px 16px', borderRadius: 12, background: `rgba(255,255,255,0.05)`, border: `1px solid rgba(255,255,255,0.2)`, textAlign: 'center' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#fff' }}>Nox TEE (SGX)</div>
+              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
+                1. Decrypt all inputs<br/>
+                2. Select Vickrey winner<br/>
+                3. Match CDS orders<br/>
+                4. Sign single attestation
+              </div>
+            </div>
+
+            <ArrowRight size={16} color="rgba(255,255,255,0.2)" style={{ margin: '0 8px' }} />
+
+            <div style={{ padding: '12px 16px', borderRadius: 12, background: `rgba(130,200,255,0.1)`, border: `1px solid rgba(130,200,255,0.3)`, textAlign: 'center' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'rgba(130,200,255,0.9)' }}>SettlementCore</div>
+              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', marginTop: 4, fontFamily: 'monospace' }}>
+                liquidationCall(winner)<br/>
+                Transfer CDS payouts
+              </div>
+            </div>
           </div>
         </motion.div>
       </motion.div>
