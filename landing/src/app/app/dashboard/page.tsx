@@ -322,7 +322,7 @@ export default function Dashboard() {
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--lime)', boxShadow: '0 0 8px var(--lime)' }} /> Sepolia
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(255,255,255,0.05)' }}>
-              <Activity size={10} color="var(--lime)" /> 4
+              <Activity size={10} color="var(--lime)" /> {bidCount + intentCount + settledEvents.length}
             </div>
             <button style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}>
               <Search size={14} />
@@ -360,28 +360,63 @@ export default function Dashboard() {
         {/* 19.3 Hero metric + chart */}
         <div style={{ marginBottom: 32 }}>
           <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-            Health Factor <Eye size={12} style={{ cursor: 'pointer' }} />
+            Health Factor
+            <button onClick={() => setPrivacyMode(m => m === 'private' ? 'public' : 'private')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: privacyMode === 'private' ? 'var(--lime)' : 'rgba(255,255,255,0.4)', padding: 2, display: 'flex' }}
+              title={privacyMode === 'private' ? 'Show public view' : 'Switch to private'}
+            >
+              {privacyMode === 'private' ? <Lock size={12} /> : <Eye size={12} />}
+            </button>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
-            <div style={{ fontSize: '4rem', fontFamily: 'var(--font-display)', fontWeight: 900, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-              {hfCurrent.toFixed(2)}
-            </div>
-            {(() => {
-              const delta = (hfCurrent - 1.20).toFixed(2);
-              const isDown = hfCurrent < 1.20;
-              return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 999,
-                  background: isDown ? 'rgba(242,201,160,0.15)' : 'rgba(184,242,78,0.12)',
-                  color: isDown ? 'var(--peach)' : 'var(--lime)', fontSize: '0.8rem', fontWeight: 700 }}>
-                  {isDown ? <ArrowDown size={12} /> : <ArrowUp size={12} />}
-                  {isDown ? delta : `+${delta}`} vs 1.20
+
+          {/* HF number — masked in private mode */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, position: 'relative' }}>
+            {privacyMode === 'private' ? (
+              <>
+                <div style={{ fontSize: '4rem', fontFamily: 'var(--font-display)', fontWeight: 900, lineHeight: 1, filter: 'blur(12px)', userSelect: 'none', opacity: 0.6 }}>
+                  {hfCurrent.toFixed(2)}
                 </div>
-              );
-            })()}
+                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Lock size={18} color="rgba(255,255,255,0.4)" />
+                  <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>sealed · switch to Public to reveal</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: '4rem', fontFamily: 'var(--font-display)', fontWeight: 900, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                  {hfCurrent.toFixed(2)}
+                </div>
+                {(() => {
+                  const delta = (hfCurrent - 1.20).toFixed(2);
+                  const isDown = hfCurrent < 1.20;
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 999,
+                      background: isDown ? 'rgba(242,201,160,0.15)' : 'rgba(184,242,78,0.12)',
+                      color: isDown ? 'var(--peach)' : 'var(--lime)', fontSize: '0.8rem', fontWeight: 700 }}>
+                      {isDown ? <ArrowDown size={12} /> : <ArrowUp size={12} />}
+                      {isDown ? delta : `+${delta}`} vs 1.20
+                    </div>
+                  );
+                })()}
+              </>
+            )}
           </div>
-          
-          <HeroChart hf={hfCurrent} timeRange={timeRange} />
-          
+
+          {/* Chart — blur in private mode */}
+          <div style={{ position: 'relative' }}>
+            <div style={privacyMode === 'private' ? { filter: 'blur(6px)', pointerEvents: 'none', opacity: 0.5 } : {}}>
+              <HeroChart hf={hfCurrent} timeRange={timeRange} />
+            </div>
+            {privacyMode === 'private' && (
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <div style={{ padding: '8px 16px', background: 'rgba(0,0,0,0.6)', borderRadius: 999, border: '1px solid rgba(184,242,78,0.2)', display: 'flex', alignItems: 'center', gap: 8, backdropFilter: 'blur(8px)' }}>
+                  <Lock size={13} color="var(--lime)" />
+                  <span style={{ fontSize: '0.78rem', color: 'var(--lime)', fontWeight: 600 }}>Switch to Public to view chart</span>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Time range pill */}
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             {['1H', '6H', '24H'].map(t => (
