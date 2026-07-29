@@ -98,13 +98,19 @@ export default function LiquidatorDesk() {
   useEffect(() => {
     const fetchLast = async () => {
       try {
+        // Thirdweb caps eth_getLogs at 10,000 blocks — cap to 9,000, floor at deployment block
         const currentBlock = await publicClient.getBlockNumber();
+        const DEPLOY_BLOCK = BigInt(11371920);
+        const fromBlock = currentBlock > DEPLOY_BLOCK + BigInt(9000)
+          ? currentBlock - BigInt(9000)
+          : DEPLOY_BLOCK;
         const logs = await publicClient.getLogs({
           address: SETTLEMENT_CORE_ADDRESS as `0x${string}`,
           event: parseAbiItem('event SettlementExecuted(address indexed borrower, address indexed winner)'),
-          fromBlock: currentBlock - BigInt(50000),
+          fromBlock,
           toBlock: 'latest',
         });
+
         if (logs.length > 0) {
           const last = logs[logs.length - 1];
           const block = await publicClient.getBlock({ blockNumber: last.blockNumber! });
