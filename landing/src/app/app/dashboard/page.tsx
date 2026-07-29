@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Lock, Activity, X, ChevronDown, Search, Globe, Eye, ArrowDown, ArrowUp, ArrowRight, BookOpen, AlertTriangle } from 'lucide-react';
+import { Shield, Lock, Activity, X, ChevronDown, Search, Globe, Eye, ArrowDown, ArrowUp, ArrowRight, BookOpen, AlertTriangle, ExternalLink } from 'lucide-react';
 import { useWallet } from '@/lib/walletContext';
 import { RequireWallet } from '@/components/RequireWallet';
 import { useShuffleText } from '@/lib/useShuffleText';
@@ -133,7 +133,7 @@ function InsightBanner({ onDismiss }: { onDismiss: () => void }) {
   );
 }
 
-function SealedActivity({ label, icon: Icon, time, realCipher }: { label: string, icon: any, time: string, realCipher?: string }) {
+function SealedActivity({ label, icon: Icon, time, realCipher, txHash, blockNumber }: { label: string, icon: any, time: string, realCipher?: string, txHash?: string, blockNumber?: bigint }) {
   const cipher = useShuffleText(realCipher || '*'.repeat(40), true);
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -143,7 +143,10 @@ function SealedActivity({ label, icon: Icon, time, realCipher }: { label: string
         </div>
         <div>
           <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{label}</div>
-          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{time}</div>
+          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+            {time}
+            {blockNumber && <span style={{ color: 'rgba(255,255,255,0.2)' }}>· block #{blockNumber.toString()}</span>}
+          </div>
         </div>
       </div>
       <div style={{ textAlign: 'right' }}>
@@ -151,12 +154,21 @@ function SealedActivity({ label, icon: Icon, time, realCipher }: { label: string
         <div className="cipher-text" style={{ fontSize: '0.85rem', color: 'var(--lime)', opacity: 0.8, fontFamily: 'monospace' }}>
           {realCipher ? `${cipher.slice(0, 18)}...` : cipher}
         </div>
+        {txHash && (
+          <a href={`https://sepolia.etherscan.io/tx/${txHash}`} target="_blank" rel="noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none', marginTop: 2 }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--lime)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}
+          >
+            <ExternalLink size={9} /> View on Etherscan
+          </a>
+        )}
       </div>
     </div>
   );
 }
 
-function PublicActivity({ label, icon: Icon, time, value }: { label: string, icon: any, time: string, value: string }) {
+function PublicActivity({ label, icon: Icon, time, value, txHash }: { label: string, icon: any, time: string, value: string, txHash?: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -171,6 +183,15 @@ function PublicActivity({ label, icon: Icon, time, value }: { label: string, ico
       <div style={{ textAlign: 'right' }}>
         <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: 4 }}>Settled</div>
         <div style={{ fontSize: '0.85rem', fontWeight: 600, fontFamily: 'monospace' }}>{value}</div>
+        {txHash && (
+          <a href={`https://sepolia.etherscan.io/tx/${txHash}`} target="_blank" rel="noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none', marginTop: 2 }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--lime)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}
+          >
+            <ExternalLink size={9} /> Etherscan
+          </a>
+        )}
       </div>
     </div>
   );
@@ -182,6 +203,8 @@ export default function Dashboard() {
   const [showBanner, setShowBanner] = useState(true);
   const [timeRange, setTimeRange] = useState('24H');
   const [settledEvents, setSettledEvents] = useState<any[]>([]);
+  const [bidLogs, setBidLogs] = useState<any[]>([]);
+  const [intentLogs, setIntentLogs] = useState<any[]>([]);
 
   const TARGET_BORROWER = '0xBfBD7FA7488b574274eaa9c9f29374EF6b0c40E8';
 
@@ -238,28 +261,43 @@ export default function Dashboard() {
     ? (accountData[5] === BigInt(2)**BigInt(256) - BigInt(1) ? 1.04 : parseFloat(formatUnits(accountData[5], 18)))
     : 1.04;
 
-  // Fetch historical settlement events using viem (more robust than wagmi useContractEvents here)
+  // Fetch all on-chain events: settlements, bids, intents
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         let currentBlock = await publicClient.getBlockNumber();
         if (currentBlock < BigInt(11330000)) {
-          currentBlock = BigInt(11337000); // Fallback to avoid fromBlock=0 if RPC returns stale block
+          currentBlock = BigInt(11337000);
         }
-        const fromBlock = currentBlock - BigInt(9000);
-        const logs = await publicClient.getLogs({
-          address: SETTLEMENT_CORE_ADDRESS as `0x${string}`,
-          event: parseAbiItem('event SettlementExecuted(address indexed borrower, address indexed winner)'),
-          fromBlock: fromBlock,
-          toBlock: 'latest',
-        });
-        setSettledEvents(logs);
+        const fromBlock = currentBlock - BigInt(50000); // wide range to catch all our txs
+
+        const [settleLogs, bidLogs, intentLogs] = await Promise.all([
+          publicClient.getLogs({
+            address: SETTLEMENT_CORE_ADDRESS as `0x${string}`,
+            event: parseAbiItem('event SettlementExecuted(address indexed borrower, address indexed winner)'),
+            fromBlock, toBlock: 'latest',
+          }),
+          publicClient.getLogs({
+            address: AUCTION_VAULT_ADDRESS as `0x${string}`,
+            event: parseAbiItem('event BidSubmitted(address indexed bidder, uint256 index)'),
+            fromBlock, toBlock: 'latest',
+          }),
+          publicClient.getLogs({
+            address: CREDIT_VAULT_ADDRESS as `0x${string}`,
+            event: parseAbiItem('event IntentSubmitted(address indexed party, bool isBuyer, uint256 index)'),
+            fromBlock, toBlock: 'latest',
+          }),
+        ]);
+
+        setSettledEvents(settleLogs);
+        setBidLogs(bidLogs);
+        setIntentLogs(intentLogs);
       } catch (err) {
-        console.error('Failed to fetch settlements:', err);
+        console.error('Failed to fetch events:', err);
       }
     };
     fetchEvents();
-    const int = setInterval(fetchEvents, 30000);
+    const int = setInterval(fetchEvents, 15000);
     return () => clearInterval(int);
   }, []);
 
@@ -324,9 +362,18 @@ export default function Dashboard() {
             <div style={{ fontSize: '4rem', fontFamily: 'var(--font-display)', fontWeight: 900, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
               {hfCurrent.toFixed(2)}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 999, background: 'rgba(242,201,160,0.15)', color: 'var(--peach)', fontSize: '0.8rem', fontWeight: 700 }}>
-              <ArrowDown size={12} /> -0.02
-            </div>
+            {(() => {
+              const delta = (hfCurrent - 1.20).toFixed(2);
+              const isDown = hfCurrent < 1.20;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 999,
+                  background: isDown ? 'rgba(242,201,160,0.15)' : 'rgba(184,242,78,0.12)',
+                  color: isDown ? 'var(--peach)' : 'var(--lime)', fontSize: '0.8rem', fontWeight: 700 }}>
+                  {isDown ? <ArrowDown size={12} /> : <ArrowUp size={12} />}
+                  {isDown ? delta : `+${delta}`} vs 1.20
+                </div>
+              );
+            })()}
           </div>
           
           <HeroChart hf={hfCurrent} timeRange={timeRange} />
@@ -353,8 +400,13 @@ export default function Dashboard() {
             
             <Link href="/app/liquidator" style={{ flex: '0 0 240px', scrollSnapAlign: 'start', textDecoration: 'none' }}>
               <div className="app-card app-card--lime" style={{ padding: 20, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(184,242,78,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--lime)', marginBottom: 16 }}>
-                  <Lock size={16} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(184,242,78,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--lime)' }}>
+                    <Lock size={16} />
+                  </div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'rgba(184,242,78,0.15)', color: 'var(--lime)', padding: '2px 8px', borderRadius: 999 }}>
+                    {bidCount} bid{bidCount !== 1 ? 's' : ''}
+                  </span>
                 </div>
                 <div style={{ fontWeight: 700, fontSize: '1rem', color: '#fff', marginBottom: 4 }}>Liquidator Desk</div>
                 <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>Submit sealed bids with TEE verification.</div>
@@ -363,8 +415,13 @@ export default function Dashboard() {
 
             <Link href="/app/hedge" style={{ flex: '0 0 240px', scrollSnapAlign: 'start', textDecoration: 'none' }}>
               <div className="app-card app-card--peach" style={{ padding: 20, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(242,201,160,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--peach)', marginBottom: 16 }}>
-                  <Shield size={16} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(242,201,160,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--peach)' }}>
+                    <Shield size={16} />
+                  </div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'rgba(242,201,160,0.15)', color: 'var(--peach)', padding: '2px 8px', borderRadius: 999 }}>
+                    {intentCount} intent{intentCount !== 1 ? 's' : ''}
+                  </span>
                 </div>
                 <div style={{ fontWeight: 700, fontSize: '1rem', color: '#fff', marginBottom: 4 }}>Hedge Desk</div>
                 <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>Purchase confidential CDS protection.</div>
@@ -373,8 +430,10 @@ export default function Dashboard() {
 
             <Link href="/app/how-it-works" style={{ flex: '0 0 240px', scrollSnapAlign: 'start', textDecoration: 'none' }}>
               <div className="app-card" style={{ padding: 20, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>
-                  <BookOpen size={16} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.6)' }}>
+                    <BookOpen size={16} />
+                  </div>
                 </div>
                 <div style={{ fontWeight: 700, fontSize: '1rem', color: '#fff', marginBottom: 4 }}>How It Works</div>
                 <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>Understand the Nox TEE architecture.</div>
@@ -398,31 +457,54 @@ export default function Dashboard() {
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {privacyMode === 'private' ? (
               <>
-                <SealedActivity 
-                  label={bidCount > 0 ? `Active Bid · #${String(bidCount).padStart(4, '0')}` : "Awaiting Bids"} 
-                  icon={Lock} 
-                  time={bidCount > 0 ? "Pending TEE attestation" : "Liquidation window open"} 
-                  realCipher={bidCount > 0 && realBidCipher && realBidCipher !== '0x0000000000000000000000000000000000000000000000000000000000000000' ? realBidCipher : undefined}
-                />
-                <SealedActivity 
-                  label={`Hedge Intents · ${intentCount}`} 
-                  icon={Shield} 
-                  time="Monitoring mempool" 
-                  realCipher={intentCount > 0 && realIntentCipher && realIntentCipher !== '0x0000000000000000000000000000000000000000000000000000000000000000' ? realIntentCipher : undefined}
-                />
+                {bidLogs.length > 0 ? bidLogs.slice().reverse().slice(0, 3).map((log, i) => (
+                  <SealedActivity
+                    key={i}
+                    label={`Sealed Bid · #${String(Number(log.args?.index ?? 0) + 1).padStart(4, '0')}`}
+                    icon={Lock}
+                    time={`${truncate(log.args?.bidder ?? '')} · TEE-attested`}
+                    realCipher={realBidCipher && realBidCipher !== '0x0000000000000000000000000000000000000000000000000000000000000000' ? realBidCipher : undefined}
+                    txHash={log.transactionHash}
+                    blockNumber={log.blockNumber}
+                  />
+                )) : (
+                  <SealedActivity
+                    label="Awaiting Bids"
+                    icon={Lock}
+                    time="Liquidation window open"
+                  />
+                )}
+                {intentLogs.length > 0 ? intentLogs.slice().reverse().slice(0, 2).map((log, i) => (
+                  <SealedActivity
+                    key={`intent-${i}`}
+                    label={`Hedge Intent · ${log.args?.isBuyer ? 'Buyer' : 'Seller'} #${String(Number(log.args?.index ?? 0) + 1).padStart(4, '0')}`}
+                    icon={Shield}
+                    time={`${truncate(log.args?.party ?? '')} · CreditVault`}
+                    realCipher={realIntentCipher && realIntentCipher !== '0x0000000000000000000000000000000000000000000000000000000000000000' ? realIntentCipher : undefined}
+                    txHash={log.transactionHash}
+                    blockNumber={log.blockNumber}
+                  />
+                )) : (
+                  <SealedActivity
+                    label={`Hedge Intents · ${intentCount}`}
+                    icon={Shield}
+                    time="Monitoring mempool"
+                  />
+                )}
               </>
             ) : settledEvents.length > 0 ? (
               settledEvents.slice(-5).reverse().map((ev, i) => (
-                <PublicActivity 
-                  key={i} 
-                  label={`Settled Borrower: ${truncate(ev.args.borrower)}`} 
-                  icon={Shield} 
-                  time="Recent" 
-                  value={`Winner: ${truncate(ev.args.winner)}`} 
+                <PublicActivity
+                  key={i}
+                  label={`Settled Borrower: ${truncate(ev.args.borrower)}`}
+                  icon={Shield}
+                  time={`Block #${ev.blockNumber?.toString() ?? 'unknown'}`}
+                  value={`Winner: ${truncate(ev.args.winner)}`}
+                  txHash={ev.transactionHash}
                 />
               ))
             ) : (
-              <div style={{ padding: '16px 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>No recent settlements</div>
+              <div style={{ padding: '16px 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>No recent settlements — check the Liquidator Desk to trigger one.</div>
             )}
           </div>
         </div>
