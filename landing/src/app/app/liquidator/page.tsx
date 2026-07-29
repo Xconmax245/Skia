@@ -172,9 +172,15 @@ export default function LiquidatorDesk() {
     data[data.length - 1] = hfCurrent;
     return data;
   }, [hfCurrent]);
-    
-  const collateralValue = accountData ? parseFloat(formatUnits(accountData[0], 8)) : 15.4;
-  const debtValue = accountData ? parseFloat(formatUnits(accountData[1], 8)) : 32450;
+  // If the borrower has no real Aave position on Sepolia (collateral == 0),
+  // use the demo fixture values so the UI is meaningful for the hackathon.
+  const hasRealPosition = accountData && accountData[0] > BigInt(0);
+  const collateralValue = hasRealPosition
+    ? parseFloat(formatUnits(accountData![0], 8))
+    : 32410;   // ~15 WETH @ $2161 = $32,415 demo collateral (USD, 8 dec)
+  const debtValue = hasRealPosition
+    ? parseFloat(formatUnits(accountData![1], 8))
+    : 31150;   // ~31,150 USDC demo debt
 
   /* Simulated load */
   useEffect(() => { const t = setTimeout(() => setLoaded(true), 900); return () => clearTimeout(t); }, []);
@@ -322,9 +328,16 @@ export default function LiquidatorDesk() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
             <div>
               <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Active Auction</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 900 }}>#0042</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 900 }}>
+                #{String(bidCount > 0 ? bidCount : 1).padStart(4, '0')}
+              </div>
             </div>
-            <span className="app-badge app-badge--peach">HF {hfCurrent === 999 ? '∞' : hfCurrent.toFixed(2)}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+              <span className="app-badge app-badge--peach">HF {hfCurrent === 999 ? '∞' : hfCurrent.toFixed(2)}</span>
+              {!hasRealPosition && (
+                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>demo fixture</span>
+              )}
+            </div>
           </div>
 
           <CipherSkeleton loaded={loaded} rows={3} widths={[100, 65, 45]}>
