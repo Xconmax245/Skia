@@ -23,7 +23,12 @@
     "viem": "^2.55.7"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^3.0.0",
+    "@nomicfoundation/hardhat-ethers": "^4.0.15",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^26.1.1",
+    "chai": "^6.2.2",
     "typescript": "^7.0.2"
   }
 }
