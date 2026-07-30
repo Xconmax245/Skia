@@ -90,9 +90,11 @@ contract CreditVault {
             );
             // confidentialTransferFrom checks isOperator again internally; this pre-check gives
             // a readable revert reason instead of the opaque ERC7984UnauthorizedSpender error.
+            Nox.allow(notional, address(collateral));
             collateral.confidentialTransferFrom(msg.sender, address(this), notional);
         }
 
+        Nox.allowThis(notional);
         intents[intentCount] = HedgeIntent(msg.sender, notional, isBuyer, true);
         emit IntentSubmitted(msg.sender, isBuyer, intentCount);
         intentCount++;
@@ -135,7 +137,8 @@ contract CreditVault {
                 // Transfer matched collateral from this vault (which holds seller deposits) -> buyer.
                 // The vault received seller collateral at submitIntent() time via confidentialTransferFrom.
                 // intents[s].party has zero balance post-submission — the vault is the correct `from`.
-                collateral.confidentialTransferFrom(address(this), intents[b].party, matched);
+                Nox.allow(matched, address(collateral));
+                collateral.confidentialTransfer(intents[b].party, matched);
             }
         }
 

@@ -211,7 +211,7 @@ export default function Dashboard() {
   const [bidLogs, setBidLogs] = useState<any[]>([]);
   const [intentLogs, setIntentLogs] = useState<any[]>([]);
 
-  const TARGET_BORROWER = '0xBfBD7FA7488b574274eaa9c9f29374EF6b0c40E8';
+  const TARGET_BORROWER = '0xc1e89984478eDe1f0Caf66342332D7CFebFfE54D';
 
   const { data: accountData } = useReadContract({
     address: AAVE_POOL_ADDRESS,
@@ -375,15 +375,10 @@ export default function Dashboard() {
               </button>
             </div>
             
-            {/* Demo trigger */}
-            <button onClick={() => {
-              // We'll just fake an update to HF for demo
-              const el = document.getElementById('hf-display');
-              if (el) el.innerText = '0.98';
-              setShowBanner(true);
-            }} style={{ padding: '4px 10px', borderRadius: 999, background: 'rgba(242,201,160,0.1)', border: '1px solid rgba(242,201,160,0.2)', color: 'var(--peach)', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Zap size={10} /> Trigger Demo Default
-            </button>
+            {/* Live tracking indicator */}
+            <div style={{ padding: '4px 10px', borderRadius: 999, background: 'rgba(172,255,104,0.1)', border: '1px solid rgba(172,255,104,0.2)', color: 'var(--lime)', fontSize: '0.7rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Zap size={10} /> Live Monitoring Active
+            </div>
           </div>
 
           {/* HF number — masked in private mode */}

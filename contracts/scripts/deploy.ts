@@ -72,15 +72,41 @@ async function main() {
   await wireTx.wait();
   console.log(`onlySettlementCore guard active. Only ${settlementAddress} can trigger settleOnDefault().`);
 
-  // ── 6. Print addresses to update .env and contracts.ts ───────────────
+  // ── 6. Update files automatically ───────────────
+  console.log("Updating files with new addresses...");
+
+  // Update .env
+  const envPath = path.join(process.cwd(), "../.env");
+  let envContent = fs.readFileSync(envPath, "utf8");
+  envContent = envContent.replace(/NEXT_PUBLIC_AUCTION_VAULT=.*/g, `NEXT_PUBLIC_AUCTION_VAULT=${auctionAddress}`);
+  envContent = envContent.replace(/NEXT_PUBLIC_CREDIT_VAULT=.*/g, `NEXT_PUBLIC_CREDIT_VAULT=${creditAddress}`);
+  envContent = envContent.replace(/NEXT_PUBLIC_SETTLEMENT_CORE=.*/g, `NEXT_PUBLIC_SETTLEMENT_CORE=${settlementAddress}`);
+  envContent = envContent.replace(/NEXT_PUBLIC_COLLATERAL_TOKEN=.*/g, `NEXT_PUBLIC_COLLATERAL_TOKEN=${collateralAddress}`);
+  fs.writeFileSync(envPath, envContent);
+
+  // Update contracts.ts
+  const contractsPath = path.join(process.cwd(), "../landing/src/lib/contracts.ts");
+  let contractsContent = fs.readFileSync(contractsPath, "utf8");
+  contractsContent = contractsContent.replace(/export const AUCTION_VAULT_ADDRESS = ".*";/g, `export const AUCTION_VAULT_ADDRESS = "${auctionAddress}";`);
+  contractsContent = contractsContent.replace(/export const CREDIT_VAULT_ADDRESS = ".*";/g, `export const CREDIT_VAULT_ADDRESS = "${creditAddress}";`);
+  contractsContent = contractsContent.replace(/export const SETTLEMENT_CORE_ADDRESS = ".*";/g, `export const SETTLEMENT_CORE_ADDRESS = "${settlementAddress}";`);
+  contractsContent = contractsContent.replace(/export const COLLATERAL_TOKEN_ADDRESS = ".*";/g, `export const COLLATERAL_TOKEN_ADDRESS = "${collateralAddress}";`);
+  fs.writeFileSync(contractsPath, contractsContent);
+
+  // Update keeper.ts defaults
+  const keeperPath = path.join(process.cwd(), "scripts/keeper.ts");
+  let keeperContent = fs.readFileSync(keeperPath, "utf8");
+  keeperContent = keeperContent.replace(/const settlementCore = process\.env\.SETTLEMENT_CORE_ADDRESS \|\| ".*";/g, `const settlementCore = process.env.SETTLEMENT_CORE_ADDRESS || "${settlementAddress}";`);
+  keeperContent = keeperContent.replace(/const auctionVault = process\.env\.AUCTION_VAULT_ADDRESS \|\| ".*";/g, `const auctionVault = process.env.AUCTION_VAULT_ADDRESS || "${auctionAddress}";`);
+  fs.writeFileSync(keeperPath, keeperContent);
+
   console.log("\n=================================");
-  console.log("Deployment complete. Update these in .env and landing/src/lib/contracts.ts:");
-  console.log(`NEXT_PUBLIC_AUCTION_VAULT=${auctionAddress}`);
-  console.log(`NEXT_PUBLIC_CREDIT_VAULT=${creditAddress}`);
-  console.log(`NEXT_PUBLIC_SETTLEMENT_CORE=${settlementAddress}`);
-  console.log(`NEXT_PUBLIC_COLLATERAL_TOKEN=${collateralAddress}`);
+  console.log("Deployment and auto-update complete!");
+  console.log(`AuctionVault: ${auctionAddress}`);
+  console.log(`CreditVault: ${creditAddress}`);
+  console.log(`SettlementCore: ${settlementAddress}`);
+  console.log(`CollateralToken: ${collateralAddress}`);
   console.log("=================================");
-  console.log("\nAlso update the fallback addresses in contracts/scripts/keeper.ts.");
 }
 
 main().catch((error) => {

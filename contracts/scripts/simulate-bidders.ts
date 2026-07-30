@@ -82,18 +82,15 @@ async function simulateBidders() {
     throw new Error('NEXT_PUBLIC_AUCTION_VAULT not set in .env. Please run deployment first.');
   }
 
-  // We need at least two bids to satisfy the `require(bidCount >= 2)` Vickrey mechanism.
-  // We will submit both bids using the primary PRIVATE_KEY to guarantee gas availability for the demo,
-  // since the contract allows the same address to submit multiple bids (bidder tracking uses msg.sender).
-  
   const pk1 = (process.env.PRIVATE_KEY as `0x${string}`);
-  if (!pk1) throw new Error('PRIVATE_KEY not set in .env');
+  const pk2 = (process.env.PRIVATE_KEY_B as `0x${string}`);
+  if (!pk1 || !pk2) throw new Error('PRIVATE_KEY or PRIVATE_KEY_B not set in .env');
 
   // Submit Bid 1: 10.5% Discount
   await submitBidForAccount(pk1, rpcUrl, contractAddress, 1050n, 'Bidder 1');
   
   // Submit Bid 2: 8.5% Discount
-  await submitBidForAccount(pk1, rpcUrl, contractAddress, 850n, 'Bidder 2');
+  await submitBidForAccount(pk2, rpcUrl, contractAddress, 850n, 'Bidder 2');
 
   console.log("\n==================================================");
   console.log("✅ Simulation Complete. 2 Sealed Bids Submitted.");
