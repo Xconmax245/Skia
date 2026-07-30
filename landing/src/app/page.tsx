@@ -270,7 +270,7 @@ function SignupSection({ subscribed, setSubscribed }: { subscribed: boolean, set
           Get Early Access
         </h2>
         <p className="body-lg text-muted" data-aos="fade-up" data-aos-delay="140"
-          style={{ maxWidth: 480, marginInline: 'auto', marginBottom: 40 }}>
+          style={{ maxWidth: 480, marginInline: 'auto', marginBottom: 40, lineHeight: 1.6 }}>
           Skia is live on Sepolia. Submit sealed bids, test confidential hedges, and experience the settlement flow firsthand.
         </p>
 
