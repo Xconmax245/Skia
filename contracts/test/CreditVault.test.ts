@@ -1,5 +1,7 @@
 import { expect } from "chai";
 import hre from "hardhat";
+import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-chai-matchers";
 
 /**
  * CreditVault settleOnDefault() integration test.
@@ -16,16 +18,16 @@ describe("CreditVault — settleOnDefault()", function () {
   this.timeout(120_000);
 
   it("should match 2 sellers with 2 buyers and move collateral obliviously", async function () {
-    const [deployer, buyer1, buyer2, seller1, seller2, keeper] = await hre.ethers.getSigners();
+    const [deployer, buyer1, buyer2, seller1, seller2, keeper] = await (hre as any).ethers.getSigners();
 
     // ── Deploy CollateralToken ──────────────────────────────────────────
-    const CollateralToken = await hre.ethers.getContractFactory("CollateralToken");
+    const CollateralToken = await (hre as any).ethers.getContractFactory("CollateralToken");
     const collateral = await CollateralToken.connect(deployer).deploy();
     await collateral.waitForDeployment();
     const collateralAddr = await collateral.getAddress();
 
     // ── Deploy CreditVault ──────────────────────────────────────────────
-    const CreditVault = await hre.ethers.getContractFactory("CreditVault");
+    const CreditVault = await (hre as any).ethers.getContractFactory("CreditVault");
     const vault = await CreditVault.connect(deployer).deploy(collateralAddr, buyer1.address);
     await vault.waitForDeployment();
     const vaultAddr = await vault.getAddress();
@@ -70,9 +72,9 @@ describe("CreditVault — settleOnDefault()", function () {
     expect(await vault.intentCount()).to.equal(4n);
 
     // ── Verify settleOnDefault is blocked for non-settlementCore ────
-    await expect(
+    await (expect(
       vault.connect(deployer).settleOnDefault()
-    ).to.be.revertedWith("not settlementCore");
+    ) as any).to.be.revertedWith("not settlementCore");
 
     // ── Call settleOnDefault as the keeper (simulates SettlementCore) ─
     const tx = await vault.connect(keeper).settleOnDefault();
@@ -83,9 +85,9 @@ describe("CreditVault — settleOnDefault()", function () {
     expect(await vault.settled()).to.equal(true);
 
     // ── Verify double-settlement is blocked ─────────────────────────
-    await expect(
+    await (expect(
       vault.connect(keeper).settleOnDefault()
-    ).to.be.revertedWith("already settled");
+    ) as any).to.be.revertedWith("already settled");
 
     // ── Verify HedgeSettlementExecuted event was emitted ────────────
     const events = receipt!.logs.filter((l: any) =>
