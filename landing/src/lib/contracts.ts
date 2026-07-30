@@ -19,10 +19,10 @@ export const AAVE_POOL_ABI = [{"inputs":[{"internalType":"address","name":"user"
 // ── Deployed addresses (Sepolia) ──────────────────────────────────────────────
 // UPDATE THESE after running: npx hardhat run scripts/deploy.ts --config hardhat.config.cjs --network sepolia
 // The deploy script prints all four addresses at the end.
-export const AUCTION_VAULT_ADDRESS    = process.env.NEXT_PUBLIC_AUCTION_VAULT    || '0xc8306aC560A8c78E4EAfaE0B5F9Ce59B665F7aC4';
-export const CREDIT_VAULT_ADDRESS     = process.env.NEXT_PUBLIC_CREDIT_VAULT     || '0xFdEfbB3C5Cf4Eb96a2D92Bc4F8e01ccD75bdf784';
-export const SETTLEMENT_CORE_ADDRESS  = process.env.NEXT_PUBLIC_SETTLEMENT_CORE  || '0xBF5D670e868f833668759A36c0Ab4d290B5Aa125';
-export const COLLATERAL_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_COLLATERAL_TOKEN || '0xf020F931B7488E8f4c43e14E677D62979f2Af2f7';
+export const AUCTION_VAULT_ADDRESS    = process.env.NEXT_PUBLIC_AUCTION_VAULT    || '0xb5241dcd293E8F6622Dae94dDde673605bf02A4E';
+export const CREDIT_VAULT_ADDRESS     = process.env.NEXT_PUBLIC_CREDIT_VAULT     || '0x8cB4182647125A9856af7EAAfaad2d3722388b0b';
+export const SETTLEMENT_CORE_ADDRESS  = process.env.NEXT_PUBLIC_SETTLEMENT_CORE  || '0x61668091Bd024eA46Aab05230f081EeedF9f4B8d';
+export const COLLATERAL_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_COLLATERAL_TOKEN || '0x45B438198EB1c2D614382F0fBF893de1C55560a0';
 
 // Sepolia Aave V3 Pool (immutable — not our contract)
 export const AAVE_POOL_ADDRESS = '0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951';
