@@ -1,0 +1,10 @@
+{
+  "name": "skia",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter landing dev",
+    "build": "pnpm --filter landing build",
+    "build:contracts": "pnpm --filter contracts compile"
+  }
+}
