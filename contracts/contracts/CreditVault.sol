@@ -137,6 +137,7 @@ contract CreditVault {
                 // Transfer matched collateral from this vault (which holds seller deposits) -> buyer.
                 // The vault received seller collateral at submitIntent() time via confidentialTransferFrom.
                 // intents[s].party has zero balance post-submission — the vault is the correct `from`.
+                Nox.allowThis(matched);
                 Nox.allow(matched, address(collateral));
                 collateral.confidentialTransfer(intents[b].party, matched);
             }
