@@ -147,7 +147,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Example execution
 const borrower = process.env.BORROWER_ADDRESS || "0xBfBD7FA7488b574274eaa9c9f29374EF6b0c40E8";
-const settlementCore = process.env.SETTLEMENT_CORE_ADDRESS || "0xa262bcb3C11564d334998fD16D052cAECe8f96c2";
+const settlementCore = process.env.SETTLEMENT_CORE_ADDRESS || "0x61668091Bd024eA46Aab05230f081EeedF9f4B8d";
 const auctionVault = process.env.AUCTION_VAULT_ADDRESS || "0xb5241dcd293E8F6622Dae94dDde673605bf02A4E";
 const pool = process.env.AAVE_POOL_ADDRESS || "0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951";
 const key = process.env.PRIVATE_KEY || "0xc0726aad8d4986ea0f9077e8b4b0bcf4920a8e35abe7678fd035f2c06836a2d9";
