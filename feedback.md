@@ -108,6 +108,18 @@ The `nox-hardhat-plugin` required a `.cjs` config file rather than `.ts`. This b
 While the TEE generates a cryptographic attestation, verifying this attestation on-chain within `SettlementCore` requires deep understanding of the Nox enclave's output format and signature verification. Currently, this feels a bit like "black magic" to the average Solidity dev.
 **Suggestion:** A standard `NoxVerifier.sol` library that abstracts away the signature checking and simply returns `(bool isValid, bytes memory verifiedOutput)` would dramatically lower the barrier to entry for cross-contract TEE verification.
 
+### 7. ACL Non-Propagation (The "Double Allow" Gotcha)
+
+A genuinely non-obvious gotcha is that ACL permissions do not propagate automatically across contract calls. If Contract A computes an encrypted value and passes it to Contract B, Contract B cannot use that value unless Contract A explicitly granted it an ACL via `Nox.allow(value, address(ContractB))`. We hit this twice in two different functions. The docs do not make this salient, leading to confusing runtime reverts when crossing contract boundaries.
+
+### 8. Raw Error-Selector Debugging
+
+When hitting an ACL issue (like the non-propagation mentioned above), the transaction reverts with a raw unmapped error selector instead of a clear message. We had to trace `0xb87a12a9` back to `NotAllowed(bytes32,address)` by hand. This kind of DX friction makes debugging cross-contract TEE logic very painful, as you get no contextual error string natively in the block explorer or hardhat console.
+
+### 9. ERC-7984 Operator-Grant Surprises
+
+While we love the ERC-7984 standard overall, its operator-grant flow differs significantly from the standard ERC-20 `approve()` flow. Because operators are time-bounded rather than amount-bounded, it requires a mental shift when designing contract interactions. It surprised us that you can't just approve a specific `euint256` amount to a router contract—you must delegate total transfer authority over your balance to the operator until a specific timestamp. This forced us to be much more careful with which contracts we set as operators.
+
 ---
 
 ## Performance Observations
