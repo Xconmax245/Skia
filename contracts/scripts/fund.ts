@@ -19,6 +19,8 @@ async function main() {
   // Target wallets
   const pkB = process.env.PRIVATE_KEY_B;
   const pkC = process.env.PRIVATE_KEY_C;
+  if (!pkB) throw new Error("Missing PRIVATE_KEY_B in .env");
+  if (!pkC) throw new Error("Missing PRIVATE_KEY_C in .env");
   const walletB = new ethers.Wallet(pkB, provider);
   const walletC = new ethers.Wallet(pkC, provider);
 
