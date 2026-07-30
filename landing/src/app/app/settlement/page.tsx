@@ -146,7 +146,7 @@ export default function SettlementFeed() {
       if (currentBlock < BigInt(11330000)) {
         currentBlock = BigInt(11337000);
       }
-      const fromBlock = currentBlock - BigInt(9000);
+      const fromBlock = currentBlock - BigInt(900);
       const logs = await publicClient.getLogs({
         address: SETTLEMENT_CORE_ADDRESS as `0x${string}`,
         event: parseAbiItem('event SettlementExecuted(address indexed borrower, address indexed winner)'),

@@ -276,8 +276,8 @@ export default function Dashboard() {
         }
         // Thirdweb caps eth_getLogs at 10,000 blocks — cap to 9,000, floor at deployment block
         const DEPLOY_BLOCK = BigInt(11371920);
-        const fromBlock = currentBlock > DEPLOY_BLOCK + BigInt(9000)
-          ? currentBlock - BigInt(9000)
+        const fromBlock = currentBlock > DEPLOY_BLOCK + BigInt(900)
+          ? currentBlock - BigInt(900)
           : DEPLOY_BLOCK;
 
         const [settleLogs, bidLogs, intentLogs] = await Promise.all([
