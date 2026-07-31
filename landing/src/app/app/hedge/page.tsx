@@ -201,9 +201,13 @@ export default function HedgeDesk() {
     try {
       const { address: userAddress } = await client.getAddresses().then(a => ({address: a[0]}));
       if (side === 'sell') {
-        setIntentState('granting-operator');
-        await client.signMessage({ account: userAddress, message: 'Confirm transaction: setOperator(address operator, uint256 validUntil)' });
-        await new Promise(r => setTimeout(r, 1200));
+        const expiry = BigInt(Math.floor(Date.now() / 1000) + 7200);
+        await writeContractAsync({
+          address: COLLATERAL_TOKEN_ADDRESS as `0x${string}`,
+          abi: COLLATERAL_TOKEN_ABI,
+          functionName: 'setOperator',
+          args: [CREDIT_VAULT_ADDRESS as `0x${string}`, Number(expiry)],
+        });
         setIntentState('operator-granted');
       }
 

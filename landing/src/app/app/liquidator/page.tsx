@@ -301,10 +301,10 @@ export default function LiquidatorDesk() {
         abi: SETTLEMENT_CORE_ABI,
         functionName: 'settle',
         args: [
-          COLLATERAL_TOKEN_ADDRESS,
-          DEBT_TOKEN_ADDRESS,
-          '0xBfBD7FA7488b574274eaa9c9f29374EF6b0c40E8', // borrower
-          accountData![1], // debtToCover
+          COLLATERAL_ASSET as `0x${string}`,
+          DEBT_ASSET as `0x${string}`,
+          TARGET_BORROWER as `0x${string}`,
+          accountData ? accountData[1] : BigInt(0), // debtToCover
           winnerAddress,
           winningDiscountBps
         ]
