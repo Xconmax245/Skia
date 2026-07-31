@@ -1,6 +1,6 @@
 require("dotenv").config({ path: "../.env" });
 require("@nomicfoundation/hardhat-ethers");
-require("@nomicfoundation/hardhat-chai-matchers");
+// require("@nomicfoundation/hardhat-chai-matchers");
 require("@iexec-nox/nox-hardhat-plugin");
 
 /** @type import('hardhat/config').HardhatUserConfig */

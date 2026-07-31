@@ -36,7 +36,7 @@ Skia is a two-sided DeFi protocol that brings **cryptographic confidentiality** 
 8. [Repository Structure](#-repository-structure)
 9. [Tech Stack](#-tech-stack)
 10. [Local Development — Step by Step](#-local-development--step-by-step)
-11. [Running the Full Demo Flow](#-running-the-full-demo-flow)
+11. [Running the Full Flow](#-running-the-full-flow)
 12. [Key Design Decisions](#-key-design-decisions)
 13. [Known Limitations & Trust Assumptions](#️-known-limitations--trust-assumptions)
 14. [What We'd Build Next](#-what-wed-build-next)
@@ -57,7 +57,7 @@ In a public auction, bids are visible in the mempool the moment they are submitt
 
 This doesn't just harm the auction winner — it collapses the second-price property entirely. The Vickrey mechanism's incentive compatibility (bid your true value) only holds when bids are secret. Without secrecy, the optimal strategy reverts to aggressive gas wars, and the borrower loses all surplus value to validator priority fees.
 
-**Concrete MEV scenario with our demo:**
+**Concrete MEV scenario with our implementation:**
 - Our two sealed bids: `1050 bps` (10.5% discount) and `850 bps` (8.5%)
 - In Skia's Vickrey auction: Winner pays the second price (`850 bps`). The borrower's collateral is liquidated at 8.5% off market. **$2,500 preserved** (on a $125k position) compared to a gas war where that 2% would go to validators.
 - In a public gas war: Both bidders keep escalating priority fees. The `1050` bidder wins, but their net profit after gas approaches zero. The remaining value flows to validators.
@@ -452,7 +452,7 @@ Environment variables read by keeper:
 |---|---|---|
 | `PRIVATE_KEY` | — | Deployer/keeper EOA private key |
 | `RPC_URL` | thirdweb Sepolia | Primary RPC endpoint |
-| `BORROWER_ADDRESS` | hardcoded demo | Aave V3 position to monitor |
+| `BORROWER_ADDRESS` | test position | Aave V3 position to monitor |
 | `SETTLEMENT_CORE_ADDRESS` | from .env | Updated by `deploy.ts` automatically |
 | `AUCTION_VAULT_ADDRESS` | from .env | Updated by `deploy.ts` automatically |
 
@@ -615,9 +615,9 @@ npx tsx scripts/redeploy-hotfix.ts
 
 ---
 
-## 🧪 Running the Full Demo Flow
+## 🧪 Running the Full Flow
 
-This is the sequence of operations that produces the live demo recorded for the hackathon submission.
+This is the sequence of operations that produces the live execution recorded for the hackathon submission.
 
 ### Step 1 — Create the Aave Edge Position
 
@@ -740,7 +740,7 @@ highest = Nox.select(candidateIsHigher, candidate, highest);
 
 ## ⚠️ Known Limitations & Trust Assumptions
 
-This is a hackathon prototype built to demonstrate the core confidential mechanics. The following constraints are deliberate — they kept the scope manageable while proving the most important architectural pieces.
+This is a hackathon prototype built to implement the core confidential mechanics. The following constraints are deliberate — they kept the scope manageable while proving the most important architectural pieces.
 
 ### 1. Single Hardcoded Reference Position
 

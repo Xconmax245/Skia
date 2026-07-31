@@ -23,15 +23,15 @@ const publicClient = createPublicClient({
   transport: http(),
 });
 
-/* Sepolia Aave Debt Asset for this demo (USDC) */
+/* Sepolia Aave Debt Asset (USDC) */
 const DEBT_ASSET = SEPOLIA_USDC;
-/* Sepolia Aave Collateral Asset for this demo (WETH) */
+/* Sepolia Aave Collateral Asset (WETH) */
 const COLLATERAL_ASSET = SEPOLIA_WETH;
 
 /* ── Dynamic data setup ── */
 // Using the created position from the fixture:
 const TARGET_BORROWER = '0xBfBD7FA7488b574274eaa9c9f29374EF6b0c40E8';
-const WINDOW_SECS = 60; // 60s for demo
+const WINDOW_SECS = 60; // 60s for liquidation window
 
 type BidState = 'idle' | 'encrypting' | 'submitted' | 'error';
 type SettleState = 'idle' | 'resolving' | 'decrypting' | 'settling' | 'done' | 'error';
@@ -172,15 +172,13 @@ export default function LiquidatorDesk() {
     data[data.length - 1] = hfCurrent;
     return data;
   }, [hfCurrent]);
-  // If the borrower has no real Aave position on Sepolia (collateral == 0),
-  // use the demo fixture values so the UI is meaningful for the hackathon.
   const hasRealPosition = accountData && accountData[0] > BigInt(0);
   const collateralValue = hasRealPosition
     ? parseFloat(formatUnits(accountData![0], 8))
-    : 32410;   // ~15 WETH @ $2161 = $32,415 demo collateral (USD, 8 dec)
+    : 0;
   const debtValue = hasRealPosition
     ? parseFloat(formatUnits(accountData![1], 8))
-    : 31150;   // ~31,150 USDC demo debt
+    : 0;
 
   /* Simulated load */
   useEffect(() => { const t = setTimeout(() => setLoaded(true), 900); return () => clearTimeout(t); }, []);
@@ -218,28 +216,24 @@ export default function LiquidatorDesk() {
     try {
       setBidState('encrypting');
       
-      // Initialize Nox SDK
-      const handleClient = await createViemHandleClient(client as any);
-      
       // Calculate basis points for the discount (e.g., 10.5% -> 1050 bps)
       const discountBps = BigInt(Math.floor(parseFloat(discount) * 100));
 
-      // Encrypt the bid
+      // Remove mocked encryption
+      const handleClient = await createViemHandleClient(client as any);
+      
       const { handle, handleProof } = await handleClient.encryptInput(
-        discountBps,
-        'uint256',
-        AUCTION_VAULT_ADDRESS as `0x${string}`
+        Buffer.from(discountBps.toString())
       );
-      
-      setEncPayload(handle);
-      
-      // Submit the real transaction to Sepolia (Mocked for demo)
-      const { address: userAddress } = await client.getAddresses().then(a => ({address: a[0]}));
-      await client.signMessage({ account: userAddress, message: 'Confirm transaction: submitBid(bytes handle, bytes handleProof)' });
-      const txHash = "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
-      await new Promise(r => setTimeout(r, 1500));
 
-      setEncTx(txHash);
+      const tx = await writeContractAsync({
+        address: AUCTION_VAULT_ADDRESS as `0x${string}`,
+        abi: AUCTION_VAULT_ABI,
+        functionName: 'submitBid',
+        args: [handle, handleProof]
+      });
+
+      setEncTx(tx);
       setBidState('submitted');
     } catch (err) {
       console.error(err);
@@ -254,11 +248,19 @@ export default function LiquidatorDesk() {
     setSettleState('resolving');
     setSettleError(null);
     try {
-      // Step 1: Resolve Vickrey auction on-chain (Mocked for demo)
-      const { address: userAddress } = await client.getAddresses().then(a => ({address: a[0]}));
-      await client.signMessage({ account: userAddress, message: 'Confirm transaction: resolveVickrey()' });
-      await new Promise(r => setTimeout(r, 1500));
-      const resolveTxHash = "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+      if (!hasRealPosition) {
+        throw new Error("No active position exists. Cannot force settle.");
+      }
+      if (hfCurrent >= 1.0) {
+        throw new Error("Position is perfectly healthy (Health Factor ≥ 1.0). Cannot liquidate.");
+      }
+
+      // Step 1: Resolve Vickrey auction on-chain
+      const resolveTxHash = await writeContractAsync({
+        address: AUCTION_VAULT_ADDRESS as `0x${string}`,
+        abi: AUCTION_VAULT_ABI,
+        functionName: 'resolveVickrey'
+      });
       console.log('[ForceSettle] resolveVickrey tx:', resolveTxHash);
 
       setSettleState('decrypting');
@@ -275,38 +277,38 @@ export default function LiquidatorDesk() {
         functionName: 'winningDiscount'
       });
 
-      // Step 3 & 4: Pull-decrypt handles off-chain via Nox Handle Gateway (Requires Wallet Signature)
+      // Step 3 & 4: Pull-decrypt handles off-chain via Nox Handle Gateway
       const handleClient = await createViemHandleClient(client as any);
       
-      let winnerAddress = address ?? '0x0000000000000000000000000000000000000000';
-      let winningDiscountBps = BigInt(1050); // Fallback
+      // If nox gateway is down, this will throw an explicit error which is what we want!
+      const rawAddressBytes = await handleClient.decrypt(winningBidderHandle as string);
+      const rawDiscountBytes = await handleClient.decrypt(winningDiscountHandle as string);
 
-      try {
-        const decWinner = await handleClient.decrypt(winningBidderHandle as `0x${string}`);
-        const rawAddr = "0x" + BigInt(decWinner.value.toString()).toString(16).padStart(40, "0");
-        if (isAddress(rawAddr) && rawAddr !== '0x0000000000000000000000000000000000000000') {
-          winnerAddress = rawAddr;
-          console.log(`[ForceSettle] 🔓 Decrypted winning liquidator address: ${winnerAddress}`);
-        }
-      } catch (err) {
-        console.warn("[ForceSettle] Decryption fallback for winner. Connected wallet may lack ACL rights.", err);
-        throw new Error("Handle decrypt failed. Ensure Deployer/Owner wallet is connected for ACL rights.");
-      }
+      // Add '0x' prefix if missing for Viem
+      let winnerAddress = (new TextDecoder().decode(rawAddressBytes)) as `0x${string}`;
+      if (!winnerAddress.startsWith('0x')) winnerAddress = `0x${winnerAddress}`;
+      
+      const winningDiscountBps = BigInt(new TextDecoder().decode(rawDiscountBytes));
 
-      try {
-        const decDiscount = await handleClient.decrypt(winningDiscountHandle as `0x${string}`);
-        winningDiscountBps = BigInt(decDiscount.value.toString());
-        console.log(`[ForceSettle] 🔓 Decrypted Vickrey second-price discount: ${winningDiscountBps} bps`);
-      } catch (err) {
-        console.warn("[ForceSettle] Decryption fallback for discount.", err);
-      }
+      console.log(`[ForceSettle] 🔓 Decrypted winning liquidator address: ${winnerAddress}`);
+      console.log(`[ForceSettle] 🔓 Decrypted Vickrey second-price discount: ${winningDiscountBps} bps`);
 
       setSettleState('settling');
 
-      // Step 5: Call settle() on SettlementCore with real decrypted values (Mocked for demo)
-      await client.signMessage({ account: userAddress, message: 'Confirm transaction: settle(address collateralAsset, address debtAsset, address borrower, uint256 debtToCover, address winner, uint256 discountBps)' });
-      await new Promise(r => setTimeout(r, 1500));
-      const tx = "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+      // Step 5: Call settle() on SettlementCore with real decrypted values
+      const tx = await writeContractAsync({
+        address: SETTLEMENT_CORE_ADDRESS as `0x${string}`,
+        abi: SETTLEMENT_CORE_ABI,
+        functionName: 'settle',
+        args: [
+          COLLATERAL_TOKEN_ADDRESS,
+          DEBT_TOKEN_ADDRESS,
+          '0xBfBD7FA7488b574274eaa9c9f29374EF6b0c40E8', // borrower
+          accountData![1], // debtToCover
+          winnerAddress,
+          winningDiscountBps
+        ]
+      });
 
       setSettleTx(tx);
       setSettleState('done');
@@ -523,7 +525,7 @@ export default function LiquidatorDesk() {
         </motion.div>
       </div>
 
-      {/* Force Settle panel — demo trigger for full lifecycle */}
+      {/* Force Settle panel — manual trigger for full lifecycle */}
       <motion.div
         initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24, duration: 0.5 }}
         className="app-card" style={{ padding: 28, marginTop: 0, borderColor: 'rgba(242,201,160,0.15)' }}

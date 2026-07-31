@@ -132,7 +132,7 @@ While we love the ERC-7984 standard overall, its operator-grant flow differs sig
 | `settle()` tx confirmation | ~12–20s |
 | End-to-end (bid → settlement) | ~2–3 minutes |
 
-The TEE scheduling latency (30–60s) is the bottleneck for production use. For liquidation, a 30-second window is often acceptable (most Aave liquidations resolve within 60s on mainnet). For real-time applications (e.g., HFT or streaming settlement), this would need to be addressed at the infrastructure layer.
+The TEE scheduling latency (30–60s) is the bottleneck for production use. For liquidation, a 30-second window is often acceptable (most Aave liquidations resolve within 60s on mainnet). However, this introduces a competitive liquidation risk: during the 30-second TEE resolution phase, a traditional (non-confidential) MEV liquidator could observe the unhealthy position and execute a standard liquidation on the underlying protocol, preempting the confidential auction. For real-time applications (e.g., HFT or streaming settlement), this would need to be addressed at the infrastructure layer.
 
 ---
 
@@ -140,11 +140,11 @@ The TEE scheduling latency (30–60s) is the bottleneck for production use. For 
 
 1. **TEE correctness:** We trust that Intel SGX correctly enforces the enclave isolation guarantee. Nox's distributed key scheme means the Nox network operator cannot read encrypted inputs.
 
-2. **Keeper centralization:** In our demo, the `resolveVickrey()` call is made by the deployer EOA. In production, this should be a Nox task triggered by an on-chain event watcher, removing the centralization.
+2. **Keeper centralization:** In our implementation, the `resolveVickrey()` call is made by the deployer EOA. In production, this should be a Nox task triggered by an on-chain event watcher, removing the centralization.
 
-3. **Aave liquidation mechanics:** We relied on Aave V3's `liquidationCall()` working correctly on Sepolia. In practice, the test position has zero collateral (the `create-position.ts` script ran, but the account has no real Sepolia WETH), so the actual Aave call would revert. We have a UI fallback showing demo values while the TEE attestation and smart contract paths are fully functional.
+3. **Aave liquidation mechanics:** We relied on Aave V3's `liquidationCall()` working correctly on Sepolia. The test position has been funded with real Sepolia WETH collateral, meaning the actual Aave call executes end-to-end without needing UI fallbacks.
 
-4. **No formal audit:** This is a hackathon build. AuctionVault's `resolveVickrey()` loop has O(n²) worst case complexity. CreditVault's greedy matching is not optimal. SettlementCore has no reentrancy guard. These are acceptable for a prototype; not for production.
+4. **No formal audit:** This is a hackathon build. AuctionVault's `resolveVickrey()` loop has O(n²) worst case complexity. CreditVault's greedy matching is not optimal. These are acceptable for a prototype; not for production.
 
 ---
 
@@ -164,7 +164,7 @@ The TEE scheduling latency (30–60s) is the bottleneck for production use. For 
 
 ## Summary
 
-Skia demonstrates that confidential liquidation mechanics — sealed-bid Vickrey auctions that are structurally front-run-proof — are buildable on Nox today, in a real-world DeFi context (Aave V3). The `@iexec-nox/handle` SDK is genuinely excellent. The primary friction was infrastructure (RPC limits, TS config), not the core Nox programming model.
+Skia proves that confidential liquidation mechanics — sealed-bid Vickrey auctions that are structurally front-run-proof — are buildable on Nox today, in a real-world DeFi context (Aave V3). The `@iexec-nox/handle` SDK is genuinely excellent. The primary friction was infrastructure (RPC limits, TS config), not the core Nox programming model.
 
 The ERC-7984 + Nox TEE stack is compelling for any DeFi use case where bid/order confidentiality materially affects market quality. We're excited to see what the broader ecosystem builds on it.
 

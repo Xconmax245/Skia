@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {AuctionVault} from "./AuctionVault.sol";
 import {CreditVault} from "./CreditVault.sol";
 import {euint256} from "@iexec-nox/nox-protocol-contracts/contracts/sdk/Nox.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 interface IERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
@@ -25,7 +26,7 @@ interface IAavePool {
  * @title SettlementCore
  * @notice Shared settlement bridge linking confidential liquidation auction and confidential CDS payout.
  */
-contract SettlementCore {
+contract SettlementCore is ReentrancyGuard {
     AuctionVault public auctionVault;
     CreditVault public creditVault;
     IAavePool public aavePool;
@@ -57,7 +58,7 @@ contract SettlementCore {
         uint256 debtToCover,
         address liquidatorWinner,
         uint256 winningDiscountBps
-    ) external onlyOwner {
+    ) external onlyOwner nonReentrant {
         // 1. Approve Aave Pool to pull debt repayment
         IERC20(debtAsset).approve(address(aavePool), debtToCover);
 

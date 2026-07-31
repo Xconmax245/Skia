@@ -208,21 +208,27 @@ export default function HedgeDesk() {
       }
 
       setIntentState('encrypting');
-      const handleClient = await createViemHandleClient(client as any);
       const notionalAmt = BigInt(Math.floor(parseFloat(amount)));
 
+      // Remove mocked encryption
+      const handleClient = await createViemHandleClient(client as any);
+      
       const { handle, handleProof } = await handleClient.encryptInput(
-        notionalAmt,
-        'uint256',
-        CREDIT_VAULT_ADDRESS as `0x${string}`
+        Buffer.from(notionalAmt.toString())
       );
 
-      await client.signMessage({ account: userAddress, message: 'Confirm transaction: submitIntent(bytes handle, bytes handleProof, bool isBuyer)' });
-      const txHash = "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
-      await new Promise(r => setTimeout(r, 1500));
+      const tx = await writeContractAsync({
+        address: CREDIT_VAULT_ADDRESS as `0x${string}`,
+        abi: CREDIT_VAULT_ABI,
+        functionName: 'submitIntent',
+        args: [handle, handleProof, side === 'buy']
+      });
 
-      setEncTx(txHash);
+      setEncTx(tx);
       setIntentState('submitted');
+      
+      // Removed mock intent array UI injection
+      
       setTimeout(() => refetchCount(), 4000);
     } catch (err) {
       console.error(err);

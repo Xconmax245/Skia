@@ -261,10 +261,9 @@ export default function Dashboard() {
   const realIntentCipher = latestIntentData ? (latestIntentData as any)[1] : null;
 
   // Aave returns type(uint256).max when a user has no borrows.
-  // For the sake of the demo narrative ("HF is approaching 1.0"), we default to 1.04 if the on-chain position is empty.
   const hfCurrent = accountData 
-    ? (accountData[5] === BigInt(2)**BigInt(256) - BigInt(1) ? 1.04 : parseFloat(formatUnits(accountData[5], 18)))
-    : 1.04;
+    ? (accountData[5] === BigInt(2)**BigInt(256) - BigInt(1) ? Infinity : parseFloat(formatUnits(accountData[5], 18)))
+    : Infinity;
 
   // Fetch all on-chain events: settlements, bids, intents
   useEffect(() => {
