@@ -30,11 +30,11 @@ Every step below is a real, independently verifiable transaction.
 
 | Step | What Happened | Transaction |
 |------|---------------|-------------|
-| 1. Create under-collateralized Aave position | Deposit WETH + borrow USDC until HF < 1 | [0x...](https://sepolia.etherscan.io/) |
-| 2. Submit sealed liquidator bids | Two (or more) encrypted bids via Nox | [0x...](https://sepolia.etherscan.io/) |
-| 3. Submit confidential CDS intents | Buyer + seller encrypted intents | [0x...](https://sepolia.etherscan.io/) |
-| 4. Resolve Vickrey + settle | TEE resolves auction + calls real Aave liquidationCall + CDS payout | [0x...](https://sepolia.etherscan.io/) |
-| 5. Result | Winning liquidator receives discounted collateral; CDS buyer receives private payout | [0x...](https://sepolia.etherscan.io/) |
+| 1. Create under-collateralized Aave position | Deposit WETH + borrow USDC until HF < 1 | [0x766102654e00dfc73b2dd7ecb3d6c11c60fbd88fd2dd96e123a93f4e8c3e7d0e](https://sepolia.etherscan.io/tx/0x766102654e00dfc73b2dd7ecb3d6c11c60fbd88fd2dd96e123a93f4e8c3e7d0e) |
+| 2. Submit sealed liquidator bids | Two (or more) encrypted bids via Nox | [0xc8899abee2cbab43fc88ee381de1f89c05b259c66a37be389b4c219efb469844](https://sepolia.etherscan.io/tx/0xc8899abee2cbab43fc88ee381de1f89c05b259c66a37be389b4c219efb469844) |
+| 3. Submit confidential CDS intents | Buyer + seller encrypted intents | [0x469878314b850a1e183c30d75d06de705e6a8d22aad44181c3659357fef98882](https://sepolia.etherscan.io/tx/0x469878314b850a1e183c30d75d06de705e6a8d22aad44181c3659357fef98882) |
+| 4. Resolve Vickrey + settle | TEE resolves auction + calls real Aave liquidationCall + CDS payout | *Not executed yet - Keeper script pending* |
+| 5. Result | Winning liquidator receives discounted collateral; CDS buyer receives private payout | *Not executed yet - Keeper script pending* |
 
 ---
 
