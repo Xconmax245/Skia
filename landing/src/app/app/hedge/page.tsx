@@ -218,7 +218,7 @@ export default function HedgeDesk() {
       const handleClient = await createViemHandleClient(client as any);
       
       const { handle, handleProof } = await handleClient.encryptInput(
-        Buffer.from(notionalAmt.toString())
+        notionalAmt, 'uint256', CREDIT_VAULT_ADDRESS as `0x${string}`
       );
 
       const tx = await writeContractAsync({

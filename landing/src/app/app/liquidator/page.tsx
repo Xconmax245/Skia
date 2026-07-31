@@ -223,7 +223,7 @@ export default function LiquidatorDesk() {
       const handleClient = await createViemHandleClient(client as any);
       
       const { handle, handleProof } = await handleClient.encryptInput(
-        Buffer.from(discountBps.toString())
+        discountBps, 'uint256', AUCTION_VAULT_ADDRESS as `0x${string}`
       );
 
       const tx = await writeContractAsync({
@@ -281,14 +281,13 @@ export default function LiquidatorDesk() {
       const handleClient = await createViemHandleClient(client as any);
       
       // If nox gateway is down, this will throw an explicit error which is what we want!
-      const rawAddressBytes = await handleClient.decrypt(winningBidderHandle as string);
-      const rawDiscountBytes = await handleClient.decrypt(winningDiscountHandle as string);
+      const rawAddressBytes = await handleClient.decrypt(winningBidderHandle as `0x${string}`);
+      const rawDiscountBytes = await handleClient.decrypt(winningDiscountHandle as `0x${string}`);
 
-      // Add '0x' prefix if missing for Viem
-      let winnerAddress = (new TextDecoder().decode(rawAddressBytes)) as `0x${string}`;
-      if (!winnerAddress.startsWith('0x')) winnerAddress = `0x${winnerAddress}`;
+      // Process decrypted address correctly from JsValue
+      let winnerAddress = ("0x" + BigInt(rawAddressBytes.value.toString()).toString(16).padStart(40, "0")) as `0x${string}`;
       
-      const winningDiscountBps = BigInt(new TextDecoder().decode(rawDiscountBytes));
+      const winningDiscountBps = BigInt(rawDiscountBytes.value.toString());
 
       console.log(`[ForceSettle] 🔓 Decrypted winning liquidator address: ${winnerAddress}`);
       console.log(`[ForceSettle] 🔓 Decrypted Vickrey second-price discount: ${winningDiscountBps} bps`);
